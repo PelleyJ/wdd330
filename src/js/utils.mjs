@@ -45,3 +45,11 @@ export function setClick(selector, callback) {
   });
   qs(selector).addEventListener("click", callback);
 }
+// utils.mjs
+export function getParam(name) {
+  const query = window.location.search;
+  const params = new URLSearchParams(query);
+  return params.get(name);
+}
+
+// (your existing exports, e.g., setLocalStorage, getLocalStorage, etc.) stay here
