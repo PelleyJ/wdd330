@@ -53,3 +53,24 @@ export function getParam(name) {
 }
 
 // (your existing exports, e.g., setLocalStorage, getLocalStorage, etc.) stay here
+export function renderListWithTemplate(
+  templateFn,
+  parentElement,
+  list,
+  position = "afterbegin",
+  clear = false
+) {
+  if (!parentElement) return;
+  if (clear) parentElement.innerHTML = "";
+  const html = list.map(templateFn).join("");
+  parentElement.insertAdjacentHTML(position, html);
+}
+
+export function toUSD(amount) {
+  const n = Number(amount);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2
+  }).format(Number.isFinite(n) ? n : 0);
+}
