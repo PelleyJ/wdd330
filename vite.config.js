@@ -2,6 +2,10 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  // Important for GitHub Pages in a repo named "wdd330"
+  base: "wdd330/",
+
+  // existing config
   root: "src/",
 
   build: {
