@@ -1,6 +1,8 @@
 import { getParam } from './utils.mjs';
 import ProductData from './ProductData.mjs';
 import ProductDetails from './ProductDetails.mjs';
+import { loadHeaderFooter } from "./utils.mjs";
+loadHeaderFooter();
 
 // Get the product ID from the URL (?product=xxxx)
 const productId = getParam('product');
