@@ -1,26 +1,16 @@
-import { renderListWithTemplate, toUSD } from "./utils.mjs";
+import { renderListWithTemplate } from "./utils.mjs";
 
 function productCardTemplate(product) {
-  // Handle common field names used in SleepOutside data safely
-  const id = product.Id ?? product.id ?? product.SKU ?? product.slug ?? "";
-  const name = product.Name ?? product.name ?? "Unnamed Product";
-  const brand = product.Brand ?? product.brand ?? "";
-  const image = product.Image ?? product.image ?? "placeholder.png";
-  const price =
-    product.FinalPrice ?? product.finalPrice ?? product.ListPrice ?? product.price ?? 0;
-
   return `
     <li class="product-card">
-      <a href="product_pages/?product=${encodeURIComponent(id)}" data-id="${id}">
-        <img src="/images/${image}" alt="Image of ${name}">
-        <h2 class="card__brand">${brand}</h2>
-        <h3 class="card__name">${name}</h3>
-        <p class="product-card__price">${toUSD(price)}</p>
+      <a href="../product_pages/index.html?product=${product.Id}">
+        <img src="${product.Images.PrimaryMedium}" alt="${product.Name}" />
+        <h3>${product.Brand.Name}</h3>
+        <p>${product.NameWithoutBrand}</p>
+        <p class="product-card__price">$${product.FinalPrice}</p>
       </a>
-      <button class="add-to-cart" data-id="${id}" aria-label="Add ${name} to cart">
-        Add to Cart
-      </button>
-    </li>`;
+    </li>
+  `;
 }
 
 export default class ProductList {
@@ -31,11 +21,21 @@ export default class ProductList {
   }
 
   async init() {
-    const list = await this.dataSource.getData(); // loads /json/<category>.json
+    const list = await this.dataSource.getData(this.category);
     this.renderList(list);
+
+    // update page title with category
+    const titleEl = document.querySelector("#product-title");
+    if (titleEl) {
+      const prettyName = this.category
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+      titleEl.textContent = `Top Products: ${prettyName}`;
+    }
   }
 
   renderList(list) {
-    renderListWithTemplate(productCardTemplate, this.listElement, list, "afterbegin", true);
+    renderListWithTemplate(productCardTemplate, this.listElement, list);
   }
 }
