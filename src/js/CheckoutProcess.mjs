@@ -1,4 +1,4 @@
-import { getLocalStorage } from "./utils.mjs";
+import { getLocalStorage, alertMessage } from "./utils.mjs";
 import ExternalServices from "./ExternalServices.mjs";
 
 export default class CheckoutProcess {
@@ -38,7 +38,8 @@ export default class CheckoutProcess {
 
     this.itemTotal = total;
 
-    if (subtotalElement) subtotalElement.innerText = `$${this.itemTotal.toFixed(2)}`;
+    if (subtotalElement)
+      subtotalElement.innerText = `$${this.itemTotal.toFixed(2)}`;
     if (countElement) countElement.innerText = count;
   }
 
@@ -90,12 +91,15 @@ export default class CheckoutProcess {
   }
 
   async checkout(form) {
+    // make sure totals are calculated
     if (!this.orderTotal) {
       this.calculateOrderTotal();
     }
 
+    // Convert form to JSON
     const order = this.formDataToJSON(form);
 
+    // Add extra fields required by the API
     order.orderDate = new Date().toISOString();
     order.orderTotal = this.orderTotal.toFixed(2);
     order.tax = this.tax.toFixed(2);
@@ -103,12 +107,36 @@ export default class CheckoutProcess {
     order.items = this.packageItems(this.list);
 
     try {
+      // Send order to API
       const result = await this.services.checkout(order);
       console.log("Order response:", result);
-      alert("Order submitted! (Response is in the console.)");
+
+      // ✅ Success: clear cart and go to success page
+      localStorage.removeItem(this.key);
+      window.location.href = "/checkout/success.html";
     } catch (err) {
       console.error("Checkout failed:", err);
-      alert("There was a problem submitting your order.");
+
+      let messageText = "There was a problem submitting your order.";
+
+      // Handle our custom servicesError from convertToJson
+      if (err.name === "servicesError" && err.message) {
+        const body = err.message;
+
+        // If server returns validation errors array
+        if (Array.isArray(body.errors)) {
+          messageText = body.errors
+            .map((e) => (e.message ? e.message : e))
+            .join("<br>");
+        }
+        // If server returns a single message field
+        else if (body.message) {
+          messageText = body.message;
+        }
+      }
+
+      // Show the message using our custom alert
+      alertMessage(messageText);
     }
   }
 }

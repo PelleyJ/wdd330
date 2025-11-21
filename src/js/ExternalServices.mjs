@@ -1,5 +1,13 @@
-const baseURL = import.meta.env.VITE_SERVER_URL; 
-import { convertToJson } from "./convertToJson.mjs";
+const baseURL = import.meta.env.VITE_SERVER_URL;
+
+async function convertToJson(res) {
+  const data = await res.json();
+  if (res.ok) {
+    return data;
+  } else {
+    throw { name: "servicesError", message: data };
+  }
+}
 
 export default class ExternalServices {
   constructor() {}
@@ -7,10 +15,8 @@ export default class ExternalServices {
   async getData(category) {
     const response = await fetch(`${baseURL}products/search/${category}`);
     const data = await convertToJson(response);
-
     return data.Result;
   }
-
 
   async findProductById(id) {
     const response = await fetch(`${baseURL}product/${id}`);
@@ -18,19 +24,14 @@ export default class ExternalServices {
     return data.Result;
   }
 
-
-    async checkout(order) {
-    console.log("Base URL:", import.meta.env.VITE_SERVER_URL);
+  async checkout(order) {
     const options = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(order),
     };
 
-    const response = await fetch(`${baseURL}checkout`, options);
-    const data = await convertToJson(response);
-    return data;
+    const response = await fetch(`${baseURL}checkout/`, options);
+    return await convertToJson(response);
   }
 }

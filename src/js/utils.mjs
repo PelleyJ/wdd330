@@ -96,3 +96,36 @@ const footerTemplate = await loadTemplate("/wdd330/partials/footer.html");
   renderWithTemplate(headerTemplate, headerElement);
   renderWithTemplate(footerTemplate, footerElement);
 }
+// Custom alert message for forms and cart actions
+export function alertMessage(message, scroll = true) {
+  const main = document.querySelector("main");
+  if (!main) return;
+
+  // Create the alert container element
+  const alert = document.createElement("div");
+  alert.classList.add("alert");
+
+  // Set message and close button
+  alert.innerHTML = `
+    <span class="alert-message">${message}</span>
+    <button type="button" class="alert-close" aria-label="Dismiss">X</button>
+  `;
+
+  // Click event for closing the alert
+  alert.addEventListener("click", (e) => {
+    if (
+      e.target.classList.contains("alert-close") ||
+      e.target.innerText === "X"
+    ) {
+      main.removeChild(alert);
+    }
+  });
+
+  // Insert alert at the top of the main element
+  main.prepend(alert);
+
+  // Ensure user sees it
+  if (scroll) {
+    window.scrollTo(0, 0);
+  }
+}
